@@ -1,0 +1,98 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sb
+from sklearn.linear_model import LinearRegression
+import numpy as np
+from sklearn.linear_model import Ridge
+from yellowbrick.regressor import ResidualsPlot
+
+# reading csv and storing as a data frame
+auto = pd.read_csv('auto-mpg.csv')
+# set option to see all of the values present in csv
+pd.set_option('display.max_columns', None)
+# printing the summary statistics for the columns of the data frame
+print(auto.describe())
+# Looking at the summary statistics, the mean mpg is 23.514573. This number is rounded.
+# The mean mpg can also be found using this:
+print(auto['mpg'].mean())
+# The above output number is not rounded.
+
+# Looking at the summary statistics generated above, the median mpg is 23.000000.
+# The median mpg can also be found using this:
+print(auto['mpg'].median())
+# The mean is higher than the median, which indicates that the data is right-skewed or positively skewed.
+
+plt.hist(auto['mpg'], color='r')
+plt.xlabel('MPG of Cars Made between 1970 and 1982', color='b')
+plt.ylabel('Frequency', color='b')
+plt.title('Histogram of MPG', color='b')
+plt.show()
+# The above histogram shows the frequency of different MPG values for the cars. It also shows a right-skewed distribution.
+
+# dropping non-numeric attributes and irrelevant numeric attributes from the data frame
+auto.drop(['No', 'car_name'], axis=1, inplace=True)
+# creating pairplot matrix with all of the relevant numeric attributes
+sb.pairplot(auto)
+# showing the pairplot matrix
+plt.show()
+# By looking at the pairplot matrix, the two attributes that seem to have the strongest linear correlation are displacement and cylinders.
+# However, this is subjective, and I can confirm using the correlation matrix generated through the below statement.
+print(auto.corr())
+
+# creating variables with X being displacement and y being mpg
+x = auto.iloc[:, 2]
+y = auto.iloc[:, 0]
+# making a scatterplot with displacement on x-axis and mpg on y-axis
+plt.scatter(x, y, marker='.', color='r')
+plt.xlabel('Displacement', color='b')
+plt.ylabel('MPG', color='b')
+plt.title('Scatterplot', color='b')
+# showing scatterplot
+plt.show()
+
+# building linear regression model
+X = x[:, np.newaxis]
+model = LinearRegression()
+# fitting model using x values and predicted linear regression y values
+model.fit(X, y)
+y_pred = model.predict(X)
+
+# Beta0 is the y-intercept.
+# printing beta0
+print(model.intercept_)
+
+# Beta1 is the coefficient of displacement.
+# printing beta1
+print(model.coef_)
+
+print("The regression equation is mpg =", model.intercept_, "+", model.coef_[0], "* displacement")
+# For this model, the predicted value for mpg will decrease as the displacement increases because the slope (beta1) is a negative value.
+
+# creating variable to store array with 200 as the displacement value and reshaping because there is one value
+array = np.array([200]).reshape(1, -1)
+# printing the predicted mpg with 200 as the displacement value
+print(model.predict(array))
+# The model will predict the mpg to be 23.11826906 when 200 is the displacement value.
+
+# creating a scatterplot of the actual mpg and displacement values
+plt.scatter(x, y)
+# superimposing the scatterplot with the linear regression line
+plt.plot(x, y_pred, color='b')
+# adding titles to plot
+plt.xlabel('Displacement')
+plt.ylabel('MPG')
+plt.suptitle('Scatterplot and Linear Regression')
+# printing the plot
+plt.show()
+
+# creating distribution of residuals plot based off of model
+visualizer = ResidualsPlot(model)
+# fitting with variables
+visualizer.fit(X, y)
+# plotting the distribution
+visualizer.show()
+
+
+
+
+
